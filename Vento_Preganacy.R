@@ -49,25 +49,40 @@ saveRDS(E_MTAB_6678_obj, "E_MTAB_6678_obj.rds")
 ########################
 
 E_MTAB_6701_data <- read.delim("raw_data_10x.txt",sep = "\t", header = T,check.names = FALSE)
-
+head(E_MTAB_6701_data)
 rownames(E_MTAB_6701_data) <-E_MTAB_6701_data$Gene
 
 E_MTAB_6701_data <- E_MTAB_6701_data[,-1]
+E_MTAB_6701_data[1:2,1:2]
+
+gene_symbols <- sub("_ENSG.*", "", rownames(E_MTAB_6701_data))
+rownames(E_MTAB_6701_data) <- make.unique(gene_symbols)
+E_MTAB_6701_data[1:2,1:2]
 
 E_MTAB_6701_obj <- CreateSeuratObject(E_MTAB_6701_data)
 rownames(E_MTAB_6701_obj)
 colnames(E_MTAB_6701_obj)
 
-E_MTAB_6701_obj[[]]
+length(E_MTAB_6701_obj@meta.data$orig.ident)
+obj.metadata <- rownames(E_MTAB_6701_obj@meta.data)
+length(obj.metadata)
+head(E_MTAB_6701_obj@meta.data)
 
 # load the metada
 E_MTAB_6701_metadata <- read.delim("meta_10x.txt",sep = "\t", header = T,check.names = FALSE)
+head(E_MTAB_6701_metadata)
+
+metadata <- rownames(E_MTAB_6701_metadata)
+length(metadata)
+
+length(E_MTAB_6701_metadata$Fetus)
+head(E_MTAB_6701_metadata)
 
 # check the metadata
 head(E_MTAB_6701_metadata)
 
 # Check for identical rownames between two objects
-all.equal(rownames(E_MTAB_6701_obj[[]]), rownames(E_MTAB_6701_metadata))
+all.equal(obj.metadata, metadata)
 
 # this was not true. the rows in the metadata and seurat metadata rows are not in the same order
 # thus i have to rearrange the metadata rows as in the order of the seurat object
@@ -88,7 +103,7 @@ E_MTAB_6701_obj <- AddMetaData(E_MTAB_6701_obj,
 # check the metadata
 E_MTAB_6701_obj[[]]
 
-saveRDS(E_MTAB_6701_obj, "E_MTAB_6701_obj.rds")
+saveRDS(E_MTAB_6701_obj, "E_MTAB_6701_obj2.rds")
 
 ####################################
 
@@ -146,6 +161,14 @@ dput(unique(E_MTAB_6701_placenta$final_cluster))
 saveRDS(E_MTAB_6701_obj, "E_MTAB_6701_obj.rds")
 E_MTAB_6678_obj <- readRDS("E_MTAB_6678_obj.rds")
 E_MTAB_6701_obj <- readRDS("E_MTAB_6701_obj.rds")
+
+E_MTAB_6678_obj[[]]
+E_MTAB_6701_obj[[]]
+rownames(E_MTAB_6701_obj)
+unique(E_MTAB_6701_obj$location)
+
+placenta_sub <- subset(E_MTAB_6701_obj, subset = location %in% "Placenta")
+saveRDS(placenta_sub, "placenta.only.rds")
 
 placenta_merge <- merge(x= E_MTAB_6678_obj,
                         y= E_MTAB_6701_obj,
@@ -329,3 +352,5 @@ Heatmap(as.matrix(scaled_expression_data),
         column_names_side  = "top",
         show_column_dend = FALSE,
         row_names_gp = gpar(fontsize = 10))
+
+# complete
